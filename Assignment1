@@ -1,0 +1,51 @@
+
+#below is the docker sample build file which will install the python 2.7, MongoDb and Tomcat
+
+######################PYTHON INSTALLATION##################
+# Use an official Python runtime as a parent image
+FROM python:2.7-slim
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+ADD . /app
+
+# Run app.py when the container launches
+CMD ["python", "app.py"]
+
+
+#######################################MONGO DB INSTALLATION ##########################
+FROM centos:centos6
+RUN yum -y install mongodb-server # this will install mongodb with out getting input from user to confirm for installation
+RUN mkdir -p /data/db # will create directory to hold mongodb data
+EXPOSE 27017 # open a port in container which will allow inbound and outbound traffic on mongodb default port
+ENTRYPOINT ["/usr/bin/mongod"]
+
+
+#tomcat installation will be done by extracting source file from tar archve so we require tar utility, and to download a tomcat tar archive we require wget utility. below commands will install the tar and wget utility.
+RUN yum install -y wget
+RUN yum install -y tar
+#for tomcat to run we require java and JAVA_HOME variable to be set. below commands will do the same.
+yum install -y java-1.7.0-openjdk java-1.7.0-openjdk-devel
+ENV JAVA_HOME /opt/jdk1.7.0_79
+
+# Download Apache Tomcat 7
+RUN cd /tmp;wget http://www-us.apache.org/dist/tomcat/tomcat-7/v7.0.79/bin/apache-tomcat-7.0.79.tar.gz
+# untar and move to proper location
+RUN cd /tmp;tar -xzf apache-tomcat-7.0.73.tar
+RUN cd /tmp;mv apache-tomcat-7.0.73 /opt/tomcat7
+RUN chmod -R 755 /opt/tomcat7
+#Opens a port allow inbound and outbound connection on tomcat port 8080
+EXPOSE 8080
+#below will start the tomcat when container get startd
+CMD ["catalina.sh", "run"]
+
+
+
+
+#########################NEED TO EXECUTE BELOW DOCKER COMMAND TO ACCESS tomcat HOST 7080 port#####
+
+#### COMMAND TO BUILD: docker build -t assignement1
+
+#####docker run --name ASSIGNEMENT1 -p 7080:8080 assignement1 

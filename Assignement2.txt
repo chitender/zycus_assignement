@@ -1,0 +1,10 @@
+##### BASH SCRIPT FOR ASSIGNEMENT 1 #####
+
+echo "please enter the command which want you to execute on all servers"
+read command
+for i in $(echo $1 | sed "s/,/ /g")
+do
+    # call your procedure/other scripts here below
+output=`ssh $i $command`
+echo "output of command $command on host $i is $output"
+done

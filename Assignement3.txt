@@ -1,0 +1,43 @@
+ASSIGNMENT 3:
+
+Apache Web Server, Apache Tomcat application server with Active MQ and Oracle and MongoDB backend.
+
+Propose a solution to migrate this application stack to AWS. Mention all the AWS services you would use and how you would maintain HA and Load Balancing (consider app to be stateless). Mention rationale for each design decision.
+
+Assumption: application has been already upgarded to support AWS SQS and DynamoDB.
+
+AWS CLOUD Architecure:
+we will be creating VPC with one private subnet and public subnet.
+on public subnet we will only configure our web server, to accept incoming request and forward it to tomcat by defining the ProxyPass and ProxyPassReverse definition. it will provide us the security also so that we will not allow any direct communication on our tomcat application server, oracle db, mongodb and activemq.
+we will host tomcat application server, Oracle RDMS instance, DynamoDb instance(MongoDB replacement) and SQS(activeMq replacement) instances in private subnet.
+
+security Group configuration.
+for Public security group, we allow inbound request on port on which webserver receive the incoming request. generaly port 80 for HTTP or 443 for HTTPS. second we will allow SSH connection on port 22 on web server from our corporate network IP range so that for O&M activities person can access the servers which are on private subnet.
+
+
+ASSUPTION 1: rely on AWS HA service, as AWS itself provide redundancy at backend for resources.
+We require below services and resources for migration.
+
+2 VM to host apache web server, apache tomcat
+1 instance of Simple Queue service in place of ActiveMq.
+1 instance of ORACLE RDMS service.
+1 of DynamoDB which is compatible with  MongoDB
+
+if our application is compatible with AWS SQS(ActiveMq replacement) and DynamoDB(Mongo DB replacement), assuming changes has been already made at application level to support AWS SQS and DynamoDB.
+
+then we need to only configure only our web server to accept incoming and outgoing request for application which is hosted on tomcat application server.
+
+ASSUMPTION 2: we configure our own HA config to avoid any minor minute downtime, because even if AWS provide redundancy of resources still chances that resource become unavailable for some time.
+
+We require below services and resources for migration.
+
+2 VM to host apache web server
+2 VM to apache tomcat
+1 instance of Simple Queue service in place of ActiveMQ.
+1 instance of ORACLE RDMS service.
+1 of DynamoDB which is compatible with  MongoDB
+
+
+we will configure the elastic load balancer to accept incoming request from public network which will be internet facing load balancer, and we will use dns name for communication because if we use IP of load balancer, chances are when LOAD BALANCER gets down and restart IP will be changed and then again we need to configure the incoming rule. where as in case of DNS dns will remain same even IF IP of load balancer get changed.
+
+we will configure 2 elastic balancer between web server and tomcat application server.
